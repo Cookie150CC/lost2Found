@@ -4,9 +4,8 @@ import { createStackNavigator, createBottomTabNavigator } from 'react-navigation
 
 import TabBarIcon from '../components/TabBarIcon';
 import HomeScreen from '../screens/HomeScreen';
-import LinksScreen from '../screens/LinksScreen';
+import StatusScreen from '../screens/StatusScreen';
 import SettingsScreen from '../screens/SettingsScreen';
-import FoundScreen from '../screens/Found';
 
 const HomeStack = createStackNavigator({
     Home: HomeScreen,
@@ -19,40 +18,27 @@ HomeStack.navigationOptions = {
         focused={focused}
         name={
             Platform.OS === 'ios'
-            ? `ios-information-circle${focused ? '' : '-outline'}`
-            : 'md-information-circle'
+            ? `ios-home${focused ? '' : '-outline'}`
+            : 'md-home'
         }
         />
     ),
 };
 
-const LinksStack = createStackNavigator({
-    Links: LinksScreen,
+const StatusStack = createStackNavigator({
+    Status: StatusScreen,
 });
 
-LinksStack.navigationOptions = {
-    tabBarLabel: 'Links',
+StatusStack.navigationOptions = {
+    tabBarLabel: 'Status',
     tabBarIcon: ({ focused }) => (
         <TabBarIcon
         focused={focused}
-        name={Platform.OS === 'ios' ? `ios-link${focused ? '' : '-outline'}` : 'md-link'}
+        name={Platform.OS === 'ios' ? `ios-compass${focused ? '' : '-outline'}` : 'md-compass'}
         />
     ),
 };
 
-const FoundStack = createStackNavigator({
-    Found: FoundScreen,
-});
-
-FoundStack.navigationOptions = {
-    tabBarLabel: 'Found',
-    tabBarIcon: ({ focused }) => (
-        <TabBarIcon
-        focused={focused}
-        name={Platform.OS === 'ios' ? `ios-link${focused ? '' : '-outline'}` : 'md-link'}
-        />
-    ),
-};
 const SettingsStack = createStackNavigator({
     Settings: SettingsScreen,
 });
@@ -70,7 +56,6 @@ SettingsStack.navigationOptions = {
 
 export default createBottomTabNavigator({
     HomeStack,
-    LinksStack,
+    StatusStack,
     SettingsStack,
-    FoundStack,
 });

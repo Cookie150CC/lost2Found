@@ -110,7 +110,7 @@ export default class HomeScreen extends React.Component {
             <Camera ref={ref => { this.camera = ref; }} />
             <View style={{backgroundColor: "green",flex: 1}} >
             <Button
-            onPress={this.takePicture}
+            onPress={this._onPressFoundButton}
             title="Found"
             color="#e8e8e8"
             />
@@ -168,8 +168,7 @@ export default class HomeScreen extends React.Component {
     };
 
     _onPressFoundButton = () => {
-
-
+      this.takePicture();
     };
 }
 
