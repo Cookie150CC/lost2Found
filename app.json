@@ -24,13 +24,13 @@
         "supportsTablet": true,
           "bundleIdentifier": "com.idk.app",
           "config": {
-            "googleMapsApiKey": "<API KEY HERE>"
+            "googleMapsApiKey": "AIzaSyB4x9ALjl2-oFpVBOKSeJJkOJn5w86IBIA"
           }
       },
       "android": {
           "package": "com.idk.app",
           "config": {
-              "googleMaps": { "apiKey": "<API KEY HERE>" }
+              "googleMaps": { "apiKey": "AIzaSyB4x9ALjl2-oFpVBOKSeJJkOJn5w86IBIA" }
            }
       }
   }

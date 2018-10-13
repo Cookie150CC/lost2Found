@@ -10,7 +10,13 @@ import {
   Button,
   Alert
 } from 'react-native';
-import { WebBrowser, MapView, Constants, Location, Permissions } from 'expo';
+import { WebBrowser,
+    MapView,
+    Constants,
+    Location,
+    Permissions,
+    Camera
+} from 'expo';
 
 import { MonoText } from '../components/StyledText';
 
@@ -21,6 +27,8 @@ export default class HomeScreen extends React.Component {
     state = {
         location: null,
         errorMessage: null,
+        hasCameraPermission: null,
+        type: Camera.Constants.Type.back,
     };
 
     componentWillMount() {
@@ -30,6 +38,7 @@ export default class HomeScreen extends React.Component {
         });
       } else {
         this._getLocationAsync();
+        this._getCameraAsync();
       }
     }
 
@@ -43,6 +52,17 @@ export default class HomeScreen extends React.Component {
 
       let location = await Location.getCurrentPositionAsync({});
       this.setState({ location });
+    };
+
+    _getCameraAsync = async () => {
+      let { status } = await Permissions.askAsync(Permissions.CAMERA);
+      if (status !== 'granted') {
+        this.setState({
+          errorMessage: 'Permission to access location was denied',
+        });
+      }
+
+      this.setState({ hasCameraPermission: status === 'granted' });
     };
 
   render() {
@@ -73,7 +93,7 @@ export default class HomeScreen extends React.Component {
         justifyContent: 'center'}}>
         <View style={{backgroundColor: "green",flex: 1}} >
           <Button
-            onPress={this._onPressButton}
+            onPress={this._onPressFoundButton}
             title="Found"
             color="#e8e8e8"
           />
@@ -128,6 +148,31 @@ export default class HomeScreen extends React.Component {
 
   _onPressButton = () => {
     Alert.alert('You tapped the button!');
+  };
+
+  _onPressFoundButton = () => {
+    // Alert.alert('ooooookay');
+    const { hasCameraPermission } = this.state;
+    if (hasCameraPermission === null) {
+      return <View />;
+    } else if (hasCameraPermission === false) {
+      return <Text>No access to camera</Text>;
+    } else {
+      return (
+        <View style={{ flex: 1 }}>
+          <Camera style={{ flex: 1 }} type={this.camera}>
+        //   console.log(this.camera)
+
+          takePicture = () => {
+            //   if (this.state.camera) {
+            //       this.state.camera.takePictureAsync()
+            //           .then(data => console.log(data))
+            //   }
+          }
+          </Camera>
+        </View>
+     );
+    }
   };
 }
 
