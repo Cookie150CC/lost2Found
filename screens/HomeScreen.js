@@ -10,7 +10,7 @@ import {
   Button,
   Alert
 } from 'react-native';
-import { WebBrowser, MapView } from 'expo';
+import { WebBrowser, MapView, Constants, Location, Permissions } from 'expo';
 
 import { MonoText } from '../components/StyledText';
 
@@ -18,17 +18,53 @@ export default class HomeScreen extends React.Component {
   static navigationOptions = {
     header: null,
   };
+    state = {
+        location: null,
+        errorMessage: null,
+    };
+
+    componentWillMount() {
+      if (Platform.OS === 'android' && !Constants.isDevice) {
+        this.setState({
+          errorMessage: 'Oops, this will not work on Sketch in an Android emulator. Try it on your device!',
+        });
+      } else {
+        this._getLocationAsync();
+      }
+    }
+
+    _getLocationAsync = async () => {
+      let { status } = await Permissions.askAsync(Permissions.LOCATION);
+      if (status !== 'granted') {
+        this.setState({
+          errorMessage: 'Permission to access location was denied',
+        });
+      }
+
+      let location = await Location.getCurrentPositionAsync({});
+      this.setState({ location });
+    };
 
   render() {
+      let lat = 0;
+      if (this.state.location) {
+        lat = this.state.location.coords.latitude;
+      }
+      let long = 0;
+     if (this.state.location) {
+          long = this.state.location.coords.longitude;
+      }
+
     return (
       <View style={styles.container}>
       <MapView
         style={{ flex: 1}}
-        initialRegion={{
-          latitude: 37.78825,
-          longitude: -122.4324,
-          latitudeDelta: 0.0922,
-          longitudeDelta: 0.0421,
+        provider="google"
+        region={{
+            latitude: lat,
+            longitude: long,
+            latitudeDelta: .005,
+            longitudeDelta: .002
         }}
         />
 

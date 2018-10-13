@@ -21,7 +21,17 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
-    }
+        "supportsTablet": true,
+          "bundleIdentifier": "com.idk.app",
+          "config": {
+            "googleMapsApiKey": "<API KEY HERE>"
+          }
+      },
+      "android": {
+          "package": "com.idk.app",
+          "config": {
+              "googleMaps": { "apiKey": "<API KEY HERE>" }
+           }
+      }
   }
 }
