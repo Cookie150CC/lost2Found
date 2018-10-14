@@ -1,0 +1,477 @@
+__d(function (global, _require, module, exports, _dependencyMap) {
+    Object.defineProperty(exports, "__esModule", {
+        value: true
+    });
+
+    var _react2 = _require(_dependencyMap[0], "react");
+
+    var _react3 = _interopRequireDefault(_react2);
+
+    var _index = _require(_dependencyMap[1], "./../node_modules/react-transform-hmr/lib/index.js");
+
+    var _index2 = _interopRequireDefault(_index);
+
+    var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+    var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+    var _class,
+        _temp2,
+        _jsxFileName = "/home/cookie/Documents/MHacks/lost2Found/screens/HomeScreen.js";
+
+    var _reactNative = _require(_dependencyMap[2], "react-native");
+
+    var _expo = _require(_dependencyMap[3], "expo");
+
+    var _firebase = _require(_dependencyMap[4], "firebase");
+
+    var firebase = _interopRequireWildcard(_firebase);
+
+    _require(_dependencyMap[5], "@firebase/firestore");
+
+    var _StyledText = _require(_dependencyMap[6], "../components/StyledText");
+
+    function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+    function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+    function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+    function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+    function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+    var _components = {
+        HomeScreen: {
+            displayName: "HomeScreen"
+        }
+    };
+
+    var _node_modulesReactTransformHmrLibIndexJs2 = (0, _index2.default)({
+        filename: "/home/cookie/Documents/MHacks/lost2Found/screens/HomeScreen.js",
+        components: _components,
+        locals: [module],
+        imports: [_react3.default]
+    });
+
+    function _wrapComponent(id) {
+        return function (Component) {
+            return _node_modulesReactTransformHmrLibIndexJs2(Component, id);
+        };
+    }
+
+    var firebaseConfig = {
+        apiKey: "AIzaSyD2WdWUXaKmq2mZmAkAw2cd_Zsldg4OfTw",
+        authDomain: "lost2found-1e87d.firebaseapp.com",
+        databaseURL: "https://lost2found-1e87d.firebaseio.com",
+        projectId: "lost2found-1e87d",
+        storageBucket: "lost2found-1e87d.appspot.com"
+    };
+    firebase.initializeApp(firebaseConfig);
+    var db = firebase.firestore();
+    var settings = {
+        timestampsInSnapshots: true
+    };
+    db.settings(settings);
+    var docRef = db.collection('items').doc('abc');
+
+    var HomeScreen = _wrapComponent("HomeScreen")((_temp2 = _class = function (_React$Component) {
+        _inherits(HomeScreen, _React$Component);
+
+        function HomeScreen() {
+            var _ref,
+                _this2 = this;
+
+            var _temp, _this, _ret;
+
+            _classCallCheck(this, HomeScreen);
+
+            for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+                args[_key] = arguments[_key];
+            }
+
+            return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_ref = HomeScreen.__proto__ || Object.getPrototypeOf(HomeScreen)).call.apply(_ref, [this].concat(args))), _this), _this.state = {
+                location: null,
+                errorMessage: null,
+                hasCameraPermission: null,
+                type: _expo.Camera.Constants.Type.back
+            }, _this._getLocationAsync = function _callee() {
+                var _ref2, status, location;
+
+                return regeneratorRuntime.async(function _callee$(_context) {
+                    while (1) {
+                        switch (_context.prev = _context.next) {
+                            case 0:
+                                _context.next = 2;
+                                return regeneratorRuntime.awrap(_expo.Permissions.askAsync(_expo.Permissions.LOCATION));
+
+                            case 2:
+                                _ref2 = _context.sent;
+                                status = _ref2.status;
+
+                                if (status !== 'granted') {
+                                    _this.setState({
+                                        errorMessage: 'Permission to access location was denied'
+                                    });
+                                }
+
+                                _context.next = 7;
+                                return regeneratorRuntime.awrap(_expo.Location.getCurrentPositionAsync({}));
+
+                            case 7:
+                                location = _context.sent;
+
+                                _this.setState({
+                                    location: location
+                                });
+
+                            case 9:
+                            case "end":
+                                return _context.stop();
+                        }
+                    }
+                }, null, _this2);
+            }, _this._getCameraAsync = function _callee2() {
+                var _ref3, status;
+
+                return regeneratorRuntime.async(function _callee2$(_context2) {
+                    while (1) {
+                        switch (_context2.prev = _context2.next) {
+                            case 0:
+                                _context2.next = 2;
+                                return regeneratorRuntime.awrap(_expo.Permissions.askAsync(_expo.Permissions.CAMERA, _expo.Permissions.CAMERA_ROLL));
+
+                            case 2:
+                                _ref3 = _context2.sent;
+                                status = _ref3.status;
+
+                                if (status !== 'granted') {
+                                    _this.setState({
+                                        errorMessage: 'Permission to access location was denied'
+                                    });
+                                }
+
+                                _this.setState({
+                                    hasCameraPermission: status === 'granted'
+                                });
+
+                            case 6:
+                            case "end":
+                                return _context2.stop();
+                        }
+                    }
+                }, null, _this2);
+            }, _this._handleLearnMorePress = function () {
+                _expo.WebBrowser.openBrowserAsync('https://docs.expo.io/versions/latest/guides/development-mode');
+            }, _this._handleHelpPress = function () {
+                _expo.WebBrowser.openBrowserAsync('https://docs.expo.io/versions/latest/guides/up-and-running.html#can-t-see-your-changes');
+            }, _this._onPressButton = function () {
+                _reactNative.Alert.alert('You tapped the button!');
+            }, _this._onPressFoundButton = function () {
+                var pic = _this.takePicture();
+
+                docRef.set({
+                    image: pic.uri,
+                    location: "",
+                    title: "",
+                    desc: ""
+                });
+            }, _temp), _possibleConstructorReturn(_this, _ret);
+        }
+
+        _createClass(HomeScreen, [{
+            key: "componentWillMount",
+            value: function componentWillMount() {
+                if (_reactNative.Platform.OS === 'android' && !_expo.Constants.isDevice) {
+                    this.setState({
+                        errorMessage: 'Oops, this will not work on Sketch in an Android emulator. Try it on your device!'
+                    });
+                } else {
+                    this._getLocationAsync();
+
+                    this._getCameraAsync();
+                }
+            }
+        }, {
+            key: "takePicture",
+            value: function takePicture() {
+                var result;
+                return regeneratorRuntime.async(function takePicture$(_context3) {
+                    while (1) {
+                        switch (_context3.prev = _context3.next) {
+                            case 0:
+                                _context3.next = 2;
+                                return regeneratorRuntime.awrap(_expo.ImagePicker.launchCameraAsync());
+
+                            case 2:
+                                result = _context3.sent;
+
+                            case 3:
+                            case "end":
+                                return _context3.stop();
+                        }
+                    }
+                }, null, this);
+            }
+        }, {
+            key: "render",
+            value: function render() {
+                var _this3 = this;
+
+                var lat = 0;
+
+                if (this.state.location) {
+                    lat = this.state.location.coords.latitude;
+                }
+
+                var long = 0;
+
+                if (this.state.location) {
+                    long = this.state.location.coords.longitude;
+                }
+
+                var hasCameraPermission = this.state.hasCameraPermission;
+                return _react3.default.createElement(
+                    _reactNative.View,
+                    {
+                        style: styles.container,
+                        __source: {
+                            fileName: _jsxFileName,
+                            lineNumber: 115
+                        }
+                    },
+                    _react3.default.createElement(_expo.MapView, {
+                        style: {
+                            flex: 1
+                        },
+                        provider: "google",
+                        region: {
+                            latitude: lat,
+                            longitude: long,
+                            latitudeDelta: .005,
+                            longitudeDelta: .002
+                        },
+                        __source: {
+                            fileName: _jsxFileName,
+                            lineNumber: 116
+                        }
+                    }),
+                    _react3.default.createElement(
+                        _reactNative.View,
+                        {
+                            style: {
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                            },
+                            __source: {
+                                fileName: _jsxFileName,
+                                lineNumber: 128
+                            }
+                        },
+                        _react3.default.createElement(_expo.Camera, {
+                            ref: function ref(_ref4) {
+                                _this3.camera = _ref4;
+                            },
+                            __source: {
+                                fileName: _jsxFileName,
+                                lineNumber: 130
+                            }
+                        }),
+                        _react3.default.createElement(
+                            _reactNative.View,
+                            {
+                                style: {
+                                    backgroundColor: "green",
+                                    flex: 1
+                                },
+                                __source: {
+                                    fileName: _jsxFileName,
+                                    lineNumber: 131
+                                }
+                            },
+                            _react3.default.createElement(_reactNative.Button, {
+                                onPress: this.takePicture,
+                                title: "Found",
+                                color: "#e8e8e8",
+                                __source: {
+                                    fileName: _jsxFileName,
+                                    lineNumber: 132
+                                }
+                            })
+                        ),
+                        _react3.default.createElement(
+                            _reactNative.View,
+                            {
+                                style: {
+                                    backgroundColor: "red",
+                                    flex: 1
+                                },
+                                __source: {
+                                    fileName: _jsxFileName,
+                                    lineNumber: 138
+                                }
+                            },
+                            _react3.default.createElement(_reactNative.Button, {
+                                onPress: this._onPressButton,
+                                title: "Lost",
+                                color: "#e8e8e8",
+                                __source: {
+                                    fileName: _jsxFileName,
+                                    lineNumber: 139
+                                }
+                            })
+                        )
+                    ),
+                    _react3.default.createElement(_reactNative.View, {
+                        style: styles.buttonContainer,
+                        __source: {
+                            fileName: _jsxFileName,
+                            lineNumber: 146
+                        }
+                    })
+                );
+            }
+        }, {
+            key: "_maybeRenderDevelopmentModeWarning",
+            value: function _maybeRenderDevelopmentModeWarning() {
+                if (__DEV__) {
+                    var learnMoreButton = _react3.default.createElement(
+                        _reactNative.Text,
+                        {
+                            onPress: this._handleLearnMorePress,
+                            style: styles.helpLinkText,
+                            __source: {
+                                fileName: _jsxFileName,
+                                lineNumber: 156
+                            }
+                        },
+                        "Learn more"
+                    );
+
+                    return _react3.default.createElement(
+                        _reactNative.Text,
+                        {
+                            style: styles.developmentModeText,
+                            __source: {
+                                fileName: _jsxFileName,
+                                lineNumber: 162
+                            }
+                        },
+                        "Development mode is enabled, your app will be slower but you can use useful development tools. ",
+                        learnMoreButton
+                    );
+                } else {
+                    return _react3.default.createElement(
+                        _reactNative.Text,
+                        {
+                            style: styles.developmentModeText,
+                            __source: {
+                                fileName: _jsxFileName,
+                                lineNumber: 169
+                            }
+                        },
+                        "You are not in development mode, your app will run at full speed."
+                    );
+                }
+            }
+        }]);
+
+        return HomeScreen;
+    }(_react3.default.Component), _class.navigationOptions = {
+        header: null
+    }, _temp2));
+
+    exports.default = HomeScreen;
+
+    var styles = _reactNative.StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: '#fff'
+        },
+        developmentModeText: {
+            marginBottom: 20,
+            color: 'rgba(0,0,0,0.4)',
+            fontSize: 14,
+            lineHeight: 19,
+            textAlign: 'center'
+        },
+        contentContainer: {
+            paddingTop: 30
+        },
+        welcomeContainer: {
+            alignItems: 'center',
+            marginTop: 10,
+            marginBottom: 20
+        },
+        welcomeImage: {
+            width: 100,
+            height: 80,
+            resizeMode: 'contain',
+            marginTop: 3,
+            marginLeft: -10
+        },
+        getStartedContainer: {
+            alignItems: 'center',
+            marginHorizontal: 50
+        },
+        homeScreenFilename: {
+            marginVertical: 7
+        },
+        codeHighlightText: {
+            color: 'rgba(96,100,109, 0.8)'
+        },
+        codeHighlightContainer: {
+            backgroundColor: 'rgba(0,0,0,0.05)',
+            borderRadius: 3,
+            paddingHorizontal: 4
+        },
+        getStartedText: {
+            fontSize: 17,
+            color: 'rgba(96,100,109, 1)',
+            lineHeight: 24,
+            textAlign: 'center'
+        },
+        tabBarInfoContainer: _extends({
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0
+        }, _reactNative.Platform.select({
+            ios: {
+                shadowColor: 'black',
+                shadowOffset: {
+                    height: -3
+                },
+                shadowOpacity: 0.1,
+                shadowRadius: 3
+            },
+            android: {
+                elevation: 20
+            }
+        }), {
+            alignItems: 'center',
+            backgroundColor: '#fbfbfb',
+            paddingVertical: 20
+        }),
+        tabBarInfoText: {
+            fontSize: 17,
+            color: 'rgba(96,100,109, 1)',
+            textAlign: 'center'
+        },
+        navigationFilename: {
+            marginTop: 5
+        },
+        helpContainer: {
+            marginTop: 15,
+            alignItems: 'center'
+        },
+        helpLink: {
+            paddingVertical: 15
+        },
+        helpLinkText: {
+            fontSize: 14,
+            color: '#2e78b7'
+        }
+    });
+});

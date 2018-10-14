@@ -74,6 +74,9 @@ __d(function (global, _require, module, exports, _dependencyMap) {
             }, {
               title: 'Found',
               data: ['Pen', 'Pencil', 'Socks']
+            }, {
+              title: 'Resolved',
+              data: ['Hat']
             }],
             renderItem: function renderItem(_ref) {
               var item = _ref.item;
@@ -83,7 +86,7 @@ __d(function (global, _require, module, exports, _dependencyMap) {
                   style: styles.item,
                   __source: {
                     fileName: _jsxFileName,
-                    lineNumber: 17
+                    lineNumber: 18
                   }
                 },
                 item
@@ -97,7 +100,7 @@ __d(function (global, _require, module, exports, _dependencyMap) {
                   style: styles.sectionHeader,
                   __source: {
                     fileName: _jsxFileName,
-                    lineNumber: 18
+                    lineNumber: 19
                   }
                 },
                 section.title

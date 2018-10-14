@@ -1,0 +1,19 @@
+__d(function (global, _require, module, exports, _dependencyMap) {
+  'use strict';
+
+  function _interopDefault(ex) {
+    return ex && typeof ex === 'object' && 'default' in ex ? ex['default'] : ex;
+  }
+
+  _require(_dependencyMap[0], "@firebase/polyfill");
+
+  var firebase = _interopDefault(_require(_dependencyMap[1], "@firebase/app"));
+
+  _require(_dependencyMap[2], "@firebase/auth");
+
+  _require(_dependencyMap[3], "@firebase/database");
+
+  _require(_dependencyMap[4], "@firebase/storage");
+
+  module.exports = firebase;
+});

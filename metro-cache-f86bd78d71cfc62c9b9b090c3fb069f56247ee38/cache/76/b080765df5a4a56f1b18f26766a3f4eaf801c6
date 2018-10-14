@@ -1,0 +1,89 @@
+__d(function (global, _require, module, exports, _dependencyMap) {
+  var babelPluginFlowReactPropTypes_proptype_PopupDialogType = {
+    dialogTitle: _require(_dependencyMap[0], "prop-types").any,
+    children: function children(props, propName, componentName) {
+      if (!Object.prototype.hasOwnProperty.call(props, propName)) {
+        throw new Error("Prop `" + propName + "` has type 'any' or 'mixed', but was not provided to `" + componentName + "`. Pass undefined or any other value.");
+      }
+    }
+  };
+  if (typeof exports !== "undefined") Object.defineProperty(exports, "babelPluginFlowReactPropTypes_proptype_PopupDialogType", {
+    value: babelPluginFlowReactPropTypes_proptype_PopupDialogType,
+    configurable: true,
+    enumerable: true
+  });
+  var babelPluginFlowReactPropTypes_proptype_DialogType = {
+    width: _require(_dependencyMap[0], "prop-types").number,
+    height: _require(_dependencyMap[0], "prop-types").number,
+    hasOverlay: _require(_dependencyMap[0], "prop-types").bool.isRequired,
+    overlayPointerEvents: _require(_dependencyMap[0], "prop-types").string,
+    overlayBackgroundColor: _require(_dependencyMap[0], "prop-types").string,
+    overlayOpacity: _require(_dependencyMap[0], "prop-types").number,
+    dialogAnimation: _require(_dependencyMap[0], "prop-types").object,
+    dialogStyle: _require(_dependencyMap[0], "prop-types").any,
+    containerStyle: _require(_dependencyMap[0], "prop-types").any,
+    animationDuration: _require(_dependencyMap[0], "prop-types").number,
+    dismissOnTouchOutside: _require(_dependencyMap[0], "prop-types").bool,
+    dismissOnHardwareBackPress: _require(_dependencyMap[0], "prop-types").bool,
+    show: _require(_dependencyMap[0], "prop-types").bool,
+    onShown: _require(_dependencyMap[0], "prop-types").func,
+    onDismissed: _require(_dependencyMap[0], "prop-types").func,
+    actions: _require(_dependencyMap[0], "prop-types").arrayOf(_require(_dependencyMap[0], "prop-types").any),
+    useNativeDriver: _require(_dependencyMap[0], "prop-types").bool,
+    children: function children(props, propName, componentName) {
+      if (!Object.prototype.hasOwnProperty.call(props, propName)) {
+        throw new Error("Prop `" + propName + "` has type 'any' or 'mixed', but was not provided to `" + componentName + "`. Pass undefined or any other value.");
+      }
+    }
+  };
+  if (typeof exports !== "undefined") Object.defineProperty(exports, "babelPluginFlowReactPropTypes_proptype_DialogType", {
+    value: babelPluginFlowReactPropTypes_proptype_DialogType,
+    configurable: true,
+    enumerable: true
+  });
+  var babelPluginFlowReactPropTypes_proptype_DialogButtonType = {
+    text: _require(_dependencyMap[0], "prop-types").string.isRequired,
+    onPress: _require(_dependencyMap[0], "prop-types").func.isRequired,
+    align: _require(_dependencyMap[0], "prop-types").string,
+    buttonStyle: _require(_dependencyMap[0], "prop-types").any,
+    textStyle: _require(_dependencyMap[0], "prop-types").any,
+    textContainerStyle: _require(_dependencyMap[0], "prop-types").any,
+    disabled: _require(_dependencyMap[0], "prop-types").bool,
+    activeOpacity: _require(_dependencyMap[0], "prop-types").number
+  };
+  if (typeof exports !== "undefined") Object.defineProperty(exports, "babelPluginFlowReactPropTypes_proptype_DialogButtonType", {
+    value: babelPluginFlowReactPropTypes_proptype_DialogButtonType,
+    configurable: true,
+    enumerable: true
+  });
+  var babelPluginFlowReactPropTypes_proptype_DialogTitleType = {
+    title: function title(props, propName, componentName) {
+      if (!Object.prototype.hasOwnProperty.call(props, propName)) {
+        throw new Error("Prop `" + propName + "` has type 'any' or 'mixed', but was not provided to `" + componentName + "`. Pass undefined or any other value.");
+      }
+    },
+    titleStyle: _require(_dependencyMap[0], "prop-types").any,
+    titleTextStyle: _require(_dependencyMap[0], "prop-types").any,
+    titleAlign: _require(_dependencyMap[0], "prop-types").string,
+    hasTitleBar: _require(_dependencyMap[0], "prop-types").bool
+  };
+  if (typeof exports !== "undefined") Object.defineProperty(exports, "babelPluginFlowReactPropTypes_proptype_DialogTitleType", {
+    value: babelPluginFlowReactPropTypes_proptype_DialogTitleType,
+    configurable: true,
+    enumerable: true
+  });
+  var babelPluginFlowReactPropTypes_proptype_OverlayType = {
+    onPress: _require(_dependencyMap[0], "prop-types").func.isRequired,
+    backgroundColor: _require(_dependencyMap[0], "prop-types").string,
+    opacity: _require(_dependencyMap[0], "prop-types").number,
+    animationDuration: _require(_dependencyMap[0], "prop-types").number,
+    showOverlay: _require(_dependencyMap[0], "prop-types").bool,
+    pointerEvents: _require(_dependencyMap[0], "prop-types").string,
+    useNativeDriver: _require(_dependencyMap[0], "prop-types").bool
+  };
+  if (typeof exports !== "undefined") Object.defineProperty(exports, "babelPluginFlowReactPropTypes_proptype_OverlayType", {
+    value: babelPluginFlowReactPropTypes_proptype_OverlayType,
+    configurable: true,
+    enumerable: true
+  });
+});

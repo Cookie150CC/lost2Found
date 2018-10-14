@@ -13,6 +13,7 @@ export default class StatusScreen extends React.Component {
         sections={[
           {title: 'Still Looking', data: ['Glove', 'Coat']},
           {title: 'Found', data: ['Pen', 'Pencil', 'Socks']},
+          {title: 'Resolved', data: ['Hat']},
         ]}
         renderItem={({item}) => <Text style={styles.item}>{item}</Text>}
         renderSectionHeader={({section}) => <Text style={styles.sectionHeader}>{section.title}</Text>}

@@ -23,7 +23,11 @@ __d(function (global, _require, module, exports, _dependencyMap) {
 
     var _expo = _require(_dependencyMap[3], "expo");
 
-    var _StyledText = _require(_dependencyMap[4], "../components/StyledText");
+    var _reactNativePopupDialog = _require(_dependencyMap[4], "react-native-popup-dialog");
+
+    var _reactNativePopupDialog2 = _interopRequireDefault(_reactNativePopupDialog);
+
+    var _StyledText = _require(_dependencyMap[5], "../components/StyledText");
 
     function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -52,6 +56,8 @@ __d(function (global, _require, module, exports, _dependencyMap) {
         };
     }
 
+    var scaleAnimation = new _reactNativePopupDialog.ScaleAnimation();
+
     var HomeScreen = _wrapComponent("HomeScreen")((_temp2 = _class = function (_React$Component) {
         _inherits(HomeScreen, _React$Component);
 
@@ -68,10 +74,15 @@ __d(function (global, _require, module, exports, _dependencyMap) {
             }
 
             return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_ref = HomeScreen.__proto__ || Object.getPrototypeOf(HomeScreen)).call.apply(_ref, [this].concat(args))), _this), _this.state = {
+                name: "",
+                desc: "",
                 location: null,
                 errorMessage: null,
                 hasCameraPermission: null,
-                type: _expo.Camera.Constants.Type.back
+                type: _expo.Camera.Constants.Type.back,
+                dialogShow: false
+            }, _this.showScaleAnimationDialog = function () {
+                _this.scaleAnimationDialog.show();
             }, _this._getLocationAsync = function _callee() {
                 var _ref2, status, location;
 
@@ -207,7 +218,7 @@ __d(function (global, _require, module, exports, _dependencyMap) {
                         style: styles.container,
                         __source: {
                             fileName: _jsxFileName,
-                            lineNumber: 95
+                            lineNumber: 113
                         }
                     },
                     _react3.default.createElement(_expo.MapView, {
@@ -223,7 +234,7 @@ __d(function (global, _require, module, exports, _dependencyMap) {
                         },
                         __source: {
                             fileName: _jsxFileName,
-                            lineNumber: 96
+                            lineNumber: 114
                         }
                     }),
                     _react3.default.createElement(
@@ -236,7 +247,7 @@ __d(function (global, _require, module, exports, _dependencyMap) {
                             },
                             __source: {
                                 fileName: _jsxFileName,
-                                lineNumber: 108
+                                lineNumber: 126
                             }
                         },
                         _react3.default.createElement(_expo.Camera, {
@@ -245,7 +256,7 @@ __d(function (global, _require, module, exports, _dependencyMap) {
                             },
                             __source: {
                                 fileName: _jsxFileName,
-                                lineNumber: 110
+                                lineNumber: 128
                             }
                         }),
                         _react3.default.createElement(
@@ -257,7 +268,7 @@ __d(function (global, _require, module, exports, _dependencyMap) {
                                 },
                                 __source: {
                                     fileName: _jsxFileName,
-                                    lineNumber: 111
+                                    lineNumber: 129
                                 }
                             },
                             _react3.default.createElement(_reactNative.Button, {
@@ -266,7 +277,7 @@ __d(function (global, _require, module, exports, _dependencyMap) {
                                 color: "#e8e8e8",
                                 __source: {
                                     fileName: _jsxFileName,
-                                    lineNumber: 112
+                                    lineNumber: 130
                                 }
                             })
                         ),
@@ -279,16 +290,16 @@ __d(function (global, _require, module, exports, _dependencyMap) {
                                 },
                                 __source: {
                                     fileName: _jsxFileName,
-                                    lineNumber: 118
+                                    lineNumber: 136
                                 }
                             },
                             _react3.default.createElement(_reactNative.Button, {
-                                onPress: this._onPressButton,
+                                onPress: this.showScaleAnimationDialog,
                                 title: "Lost",
                                 color: "#e8e8e8",
                                 __source: {
                                     fileName: _jsxFileName,
-                                    lineNumber: 119
+                                    lineNumber: 137
                                 }
                             })
                         )
@@ -297,9 +308,107 @@ __d(function (global, _require, module, exports, _dependencyMap) {
                         style: styles.buttonContainer,
                         __source: {
                             fileName: _jsxFileName,
-                            lineNumber: 126
+                            lineNumber: 144
                         }
-                    })
+                    }),
+                    _react3.default.createElement(
+                        _reactNativePopupDialog2.default,
+                        {
+                            ref: function ref(popupDialog) {
+                                _this3.scaleAnimationDialog = popupDialog;
+                            },
+                            dialogAnimation: scaleAnimation,
+                            dialogTitle: _react3.default.createElement(_reactNativePopupDialog.DialogTitle, {
+                                title: "Loss Report",
+                                __source: {
+                                    fileName: _jsxFileName,
+                                    lineNumber: 153
+                                }
+                            }),
+                            actions: [_react3.default.createElement(_reactNativePopupDialog.DialogButton, {
+                                text: "Dismiss",
+                                onPress: function onPress() {
+                                    _this3.scaleAnimationDialog.dismiss();
+                                },
+                                key: "button-1",
+                                __source: {
+                                    fileName: _jsxFileName,
+                                    lineNumber: 155
+                                }
+                            }), _react3.default.createElement(_reactNativePopupDialog.DialogButton, {
+                                text: "Submit",
+                                onPress: function onPress() {
+                                    _this3.addToDB(_this3.state.name, _this3.state.desc);
+                                },
+                                key: "button-2",
+                                __source: {
+                                    fileName: _jsxFileName,
+                                    lineNumber: 161
+                                }
+                            })],
+                            __source: {
+                                fileName: _jsxFileName,
+                                lineNumber: 148
+                            }
+                        },
+                        "  ",
+                        _react3.default.createElement(
+                            _reactNative.View,
+                            {
+                                __source: {
+                                    fileName: _jsxFileName,
+                                    lineNumber: 169
+                                }
+                            },
+                            _react3.default.createElement(_reactNative.TextInput, {
+                                style: {
+                                    height: 40,
+                                    borderColor: 'gray',
+                                    borderWidth: 1,
+                                    textAlign: "center"
+                                },
+                                onChangeText: function onChangeText(name) {
+                                    return _this3.setState({
+                                        name: name
+                                    });
+                                },
+                                value: this.state.name,
+                                placeholder: "Item Name",
+                                __source: {
+                                    fileName: _jsxFileName,
+                                    lineNumber: 170
+                                }
+                            })
+                        ),
+                        _react3.default.createElement(
+                            _reactNative.View,
+                            {
+                                __source: {
+                                    fileName: _jsxFileName,
+                                    lineNumber: 177
+                                }
+                            },
+                            _react3.default.createElement(_reactNative.TextInput, {
+                                style: {
+                                    height: 40,
+                                    borderColor: 'gray',
+                                    borderWidth: 1,
+                                    textAlign: "center"
+                                },
+                                onChangeText: function onChangeText(desc) {
+                                    return _this3.setState({
+                                        desc: desc
+                                    });
+                                },
+                                value: this.state.desc,
+                                placeholder: "Item Description(ex. Color)",
+                                __source: {
+                                    fileName: _jsxFileName,
+                                    lineNumber: 178
+                                }
+                            })
+                        )
+                    )
                 );
             }
         }, {
@@ -313,7 +422,7 @@ __d(function (global, _require, module, exports, _dependencyMap) {
                             style: styles.helpLinkText,
                             __source: {
                                 fileName: _jsxFileName,
-                                lineNumber: 136
+                                lineNumber: 192
                             }
                         },
                         "Learn more"
@@ -325,7 +434,7 @@ __d(function (global, _require, module, exports, _dependencyMap) {
                             style: styles.developmentModeText,
                             __source: {
                                 fileName: _jsxFileName,
-                                lineNumber: 142
+                                lineNumber: 198
                             }
                         },
                         "Development mode is enabled, your app will be slower but you can use useful development tools. ",
@@ -338,12 +447,18 @@ __d(function (global, _require, module, exports, _dependencyMap) {
                             style: styles.developmentModeText,
                             __source: {
                                 fileName: _jsxFileName,
-                                lineNumber: 149
+                                lineNumber: 205
                             }
                         },
                         "You are not in development mode, your app will run at full speed."
                     );
                 }
+            }
+        }, {
+            key: "addToDB",
+            value: function addToDB(n, d) {
+                alert("added to db");
+                this.scaleAnimationDialog.dismiss();
             }
         }]);
 

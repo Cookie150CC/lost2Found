@@ -1,0 +1,1153 @@
+__d(function (global, _require, module, exports, _dependencyMap) {
+    'use strict';
+
+    Object.defineProperty(exports, '__esModule', {
+        value: true
+    });
+
+    var tslib_1 = _require(_dependencyMap[0], "tslib");
+
+    var CONSTANTS = {
+        NODE_CLIENT: false,
+        NODE_ADMIN: false,
+        SDK_VERSION: '${JSCORE_VERSION}'
+    };
+
+    var assert = function assert(assertion, message) {
+        if (!assertion) {
+            throw assertionError(message);
+        }
+    };
+
+    var assertionError = function assertionError(message) {
+        return new Error('Firebase Database (' + CONSTANTS.SDK_VERSION + ') INTERNAL ASSERT FAILED: ' + message);
+    };
+
+    var stringToByteArray = function stringToByteArray(str) {
+        var out = [],
+            p = 0;
+
+        for (var i = 0; i < str.length; i++) {
+            var c = str.charCodeAt(i);
+
+            if (c < 128) {
+                out[p++] = c;
+            } else if (c < 2048) {
+                out[p++] = c >> 6 | 192;
+                out[p++] = c & 63 | 128;
+            } else if ((c & 0xfc00) == 0xd800 && i + 1 < str.length && (str.charCodeAt(i + 1) & 0xfc00) == 0xdc00) {
+                c = 0x10000 + ((c & 0x03ff) << 10) + (str.charCodeAt(++i) & 0x03ff);
+                out[p++] = c >> 18 | 240;
+                out[p++] = c >> 12 & 63 | 128;
+                out[p++] = c >> 6 & 63 | 128;
+                out[p++] = c & 63 | 128;
+            } else {
+                out[p++] = c >> 12 | 224;
+                out[p++] = c >> 6 & 63 | 128;
+                out[p++] = c & 63 | 128;
+            }
+        }
+
+        return out;
+    };
+
+    var byteArrayToString = function byteArrayToString(bytes) {
+        var out = [],
+            pos = 0,
+            c = 0;
+
+        while (pos < bytes.length) {
+            var c1 = bytes[pos++];
+
+            if (c1 < 128) {
+                out[c++] = String.fromCharCode(c1);
+            } else if (c1 > 191 && c1 < 224) {
+                var c2 = bytes[pos++];
+                out[c++] = String.fromCharCode((c1 & 31) << 6 | c2 & 63);
+            } else if (c1 > 239 && c1 < 365) {
+                var c2 = bytes[pos++];
+                var c3 = bytes[pos++];
+                var c4 = bytes[pos++];
+                var u = ((c1 & 7) << 18 | (c2 & 63) << 12 | (c3 & 63) << 6 | c4 & 63) - 0x10000;
+                out[c++] = String.fromCharCode(0xd800 + (u >> 10));
+                out[c++] = String.fromCharCode(0xdc00 + (u & 1023));
+            } else {
+                var c2 = bytes[pos++];
+                var c3 = bytes[pos++];
+                out[c++] = String.fromCharCode((c1 & 15) << 12 | (c2 & 63) << 6 | c3 & 63);
+            }
+        }
+
+        return out.join('');
+    };
+
+    var base64 = {
+        byteToCharMap_: null,
+        charToByteMap_: null,
+        byteToCharMapWebSafe_: null,
+        charToByteMapWebSafe_: null,
+        ENCODED_VALS_BASE: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' + 'abcdefghijklmnopqrstuvwxyz' + '0123456789',
+
+        get ENCODED_VALS() {
+            return this.ENCODED_VALS_BASE + '+/=';
+        },
+
+        get ENCODED_VALS_WEBSAFE() {
+            return this.ENCODED_VALS_BASE + '-_.';
+        },
+
+        HAS_NATIVE_SUPPORT: typeof atob === 'function',
+        encodeByteArray: function encodeByteArray(input, opt_webSafe) {
+            if (!Array.isArray(input)) {
+                throw Error('encodeByteArray takes an array as a parameter');
+            }
+
+            this.init_();
+            var byteToCharMap = opt_webSafe ? this.byteToCharMapWebSafe_ : this.byteToCharMap_;
+            var output = [];
+
+            for (var i = 0; i < input.length; i += 3) {
+                var byte1 = input[i];
+                var haveByte2 = i + 1 < input.length;
+                var byte2 = haveByte2 ? input[i + 1] : 0;
+                var haveByte3 = i + 2 < input.length;
+                var byte3 = haveByte3 ? input[i + 2] : 0;
+                var outByte1 = byte1 >> 2;
+                var outByte2 = (byte1 & 0x03) << 4 | byte2 >> 4;
+                var outByte3 = (byte2 & 0x0f) << 2 | byte3 >> 6;
+                var outByte4 = byte3 & 0x3f;
+
+                if (!haveByte3) {
+                    outByte4 = 64;
+
+                    if (!haveByte2) {
+                        outByte3 = 64;
+                    }
+                }
+
+                output.push(byteToCharMap[outByte1], byteToCharMap[outByte2], byteToCharMap[outByte3], byteToCharMap[outByte4]);
+            }
+
+            return output.join('');
+        },
+        encodeString: function encodeString(input, opt_webSafe) {
+            if (this.HAS_NATIVE_SUPPORT && !opt_webSafe) {
+                return btoa(input);
+            }
+
+            return this.encodeByteArray(stringToByteArray(input), opt_webSafe);
+        },
+        decodeString: function decodeString(input, opt_webSafe) {
+            if (this.HAS_NATIVE_SUPPORT && !opt_webSafe) {
+                return atob(input);
+            }
+
+            return byteArrayToString(this.decodeStringToByteArray(input, opt_webSafe));
+        },
+        decodeStringToByteArray: function decodeStringToByteArray(input, opt_webSafe) {
+            this.init_();
+            var charToByteMap = opt_webSafe ? this.charToByteMapWebSafe_ : this.charToByteMap_;
+            var output = [];
+
+            for (var i = 0; i < input.length;) {
+                var byte1 = charToByteMap[input.charAt(i++)];
+                var haveByte2 = i < input.length;
+                var byte2 = haveByte2 ? charToByteMap[input.charAt(i)] : 0;
+                ++i;
+                var haveByte3 = i < input.length;
+                var byte3 = haveByte3 ? charToByteMap[input.charAt(i)] : 64;
+                ++i;
+                var haveByte4 = i < input.length;
+                var byte4 = haveByte4 ? charToByteMap[input.charAt(i)] : 64;
+                ++i;
+
+                if (byte1 == null || byte2 == null || byte3 == null || byte4 == null) {
+                    throw Error();
+                }
+
+                var outByte1 = byte1 << 2 | byte2 >> 4;
+                output.push(outByte1);
+
+                if (byte3 != 64) {
+                    var outByte2 = byte2 << 4 & 0xf0 | byte3 >> 2;
+                    output.push(outByte2);
+
+                    if (byte4 != 64) {
+                        var outByte3 = byte3 << 6 & 0xc0 | byte4;
+                        output.push(outByte3);
+                    }
+                }
+            }
+
+            return output;
+        },
+        init_: function init_() {
+            if (!this.byteToCharMap_) {
+                this.byteToCharMap_ = {};
+                this.charToByteMap_ = {};
+                this.byteToCharMapWebSafe_ = {};
+                this.charToByteMapWebSafe_ = {};
+
+                for (var i = 0; i < this.ENCODED_VALS.length; i++) {
+                    this.byteToCharMap_[i] = this.ENCODED_VALS.charAt(i);
+                    this.charToByteMap_[this.byteToCharMap_[i]] = i;
+                    this.byteToCharMapWebSafe_[i] = this.ENCODED_VALS_WEBSAFE.charAt(i);
+                    this.charToByteMapWebSafe_[this.byteToCharMapWebSafe_[i]] = i;
+
+                    if (i >= this.ENCODED_VALS_BASE.length) {
+                        this.charToByteMap_[this.ENCODED_VALS_WEBSAFE.charAt(i)] = i;
+                        this.charToByteMapWebSafe_[this.ENCODED_VALS.charAt(i)] = i;
+                    }
+                }
+            }
+        }
+    };
+
+    var base64Encode = function base64Encode(str) {
+        var utf8Bytes = stringToByteArray(str);
+        return base64.encodeByteArray(utf8Bytes, true);
+    };
+
+    var base64Decode = function base64Decode(str) {
+        try {
+            return base64.decodeString(str, true);
+        } catch (e) {
+            console.error('base64Decode failed: ', e);
+        }
+
+        return null;
+    };
+
+    function deepCopy(value) {
+        return deepExtend(undefined, value);
+    }
+
+    function deepExtend(target, source) {
+        if (!(source instanceof Object)) {
+            return source;
+        }
+
+        switch (source.constructor) {
+            case Date:
+                var dateValue = source;
+                return new Date(dateValue.getTime());
+
+            case Object:
+                if (target === undefined) {
+                    target = {};
+                }
+
+                break;
+
+            case Array:
+                target = [];
+                break;
+
+            default:
+                return source;
+        }
+
+        for (var prop in source) {
+            if (!source.hasOwnProperty(prop)) {
+                continue;
+            }
+
+            target[prop] = deepExtend(target[prop], source[prop]);
+        }
+
+        return target;
+    }
+
+    function patchProperty(obj, prop, value) {
+        obj[prop] = value;
+    }
+
+    var Deferred = function () {
+        function Deferred() {
+            var _this = this;
+
+            this.promise = new Promise(function (resolve, reject) {
+                _this.resolve = resolve;
+                _this.reject = reject;
+            });
+        }
+
+        Deferred.prototype.wrapCallback = function (callback) {
+            var _this = this;
+
+            return function (error, value) {
+                if (error) {
+                    _this.reject(error);
+                } else {
+                    _this.resolve(value);
+                }
+
+                if (typeof callback === 'function') {
+                    _this.promise.catch(function () {});
+
+                    if (callback.length === 1) {
+                        callback(error);
+                    } else {
+                        callback(error, value);
+                    }
+                }
+            };
+        };
+
+        return Deferred;
+    }();
+
+    var getUA = function getUA() {
+        if (typeof navigator !== 'undefined' && typeof navigator['userAgent'] === 'string') {
+            return navigator['userAgent'];
+        } else {
+            return '';
+        }
+    };
+
+    var isMobileCordova = function isMobileCordova() {
+        return typeof window !== 'undefined' && !!(window['cordova'] || window['phonegap'] || window['PhoneGap']) && /ios|iphone|ipod|ipad|android|blackberry|iemobile/i.test(getUA());
+    };
+
+    var isReactNative = function isReactNative() {
+        return typeof navigator === 'object' && navigator['product'] === 'ReactNative';
+    };
+
+    var isNodeSdk = function isNodeSdk() {
+        return CONSTANTS.NODE_CLIENT === true || CONSTANTS.NODE_ADMIN === true;
+    };
+
+    var ERROR_NAME = 'FirebaseError';
+    var captureStackTrace = Error.captureStackTrace;
+
+    function patchCapture(captureFake) {
+        var result = captureStackTrace;
+        captureStackTrace = captureFake;
+        return result;
+    }
+
+    var FirebaseError = function () {
+        function FirebaseError(code, message) {
+            this.code = code;
+            this.message = message;
+
+            if (captureStackTrace) {
+                captureStackTrace(this, ErrorFactory.prototype.create);
+            } else {
+                try {
+                    throw Error.apply(this, arguments);
+                } catch (err) {
+                    this.name = ERROR_NAME;
+                    Object.defineProperty(this, 'stack', {
+                        get: function get() {
+                            return err.stack;
+                        }
+                    });
+                }
+            }
+        }
+
+        return FirebaseError;
+    }();
+
+    FirebaseError.prototype = Object.create(Error.prototype);
+    FirebaseError.prototype.constructor = FirebaseError;
+    FirebaseError.prototype.name = ERROR_NAME;
+
+    var ErrorFactory = function () {
+        function ErrorFactory(service, serviceName, errors) {
+            this.service = service;
+            this.serviceName = serviceName;
+            this.errors = errors;
+            this.pattern = /\{\$([^}]+)}/g;
+        }
+
+        ErrorFactory.prototype.create = function (code, data) {
+            if (data === undefined) {
+                data = {};
+            }
+
+            var template = this.errors[code];
+            var fullCode = this.service + '/' + code;
+            var message;
+
+            if (template === undefined) {
+                message = 'Error';
+            } else {
+                message = template.replace(this.pattern, function (match, key) {
+                    var value = data[key];
+                    return value !== undefined ? value.toString() : '<' + key + '?>';
+                });
+            }
+
+            message = this.serviceName + ': ' + message + ' (' + fullCode + ').';
+            var err = new FirebaseError(fullCode, message);
+
+            for (var prop in data) {
+                if (!data.hasOwnProperty(prop) || prop.slice(-1) === '_') {
+                    continue;
+                }
+
+                err[prop] = data[prop];
+            }
+
+            return err;
+        };
+
+        return ErrorFactory;
+    }();
+
+    function jsonEval(str) {
+        return JSON.parse(str);
+    }
+
+    function stringify(data) {
+        return JSON.stringify(data);
+    }
+
+    var decode = function decode(token) {
+        var header = {},
+            claims = {},
+            data = {},
+            signature = '';
+
+        try {
+            var parts = token.split('.');
+            header = jsonEval(base64Decode(parts[0]) || '');
+            claims = jsonEval(base64Decode(parts[1]) || '');
+            signature = parts[2];
+            data = claims['d'] || {};
+            delete claims['d'];
+        } catch (e) {}
+
+        return {
+            header: header,
+            claims: claims,
+            data: data,
+            signature: signature
+        };
+    };
+
+    var isValidTimestamp = function isValidTimestamp(token) {
+        var claims = decode(token).claims,
+            now = Math.floor(new Date().getTime() / 1000),
+            validSince,
+            validUntil;
+
+        if (typeof claims === 'object') {
+            if (claims.hasOwnProperty('nbf')) {
+                validSince = claims['nbf'];
+            } else if (claims.hasOwnProperty('iat')) {
+                validSince = claims['iat'];
+            }
+
+            if (claims.hasOwnProperty('exp')) {
+                validUntil = claims['exp'];
+            } else {
+                validUntil = validSince + 86400;
+            }
+        }
+
+        return now && validSince && validUntil && now >= validSince && now <= validUntil;
+    };
+
+    var issuedAtTime = function issuedAtTime(token) {
+        var claims = decode(token).claims;
+
+        if (typeof claims === 'object' && claims.hasOwnProperty('iat')) {
+            return claims['iat'];
+        }
+
+        return null;
+    };
+
+    var isValidFormat = function isValidFormat(token) {
+        var decoded = decode(token),
+            claims = decoded.claims;
+        return !!claims && typeof claims === 'object' && claims.hasOwnProperty('iat');
+    };
+
+    var isAdmin = function isAdmin(token) {
+        var claims = decode(token).claims;
+        return typeof claims === 'object' && claims['admin'] === true;
+    };
+
+    var contains = function contains(obj, key) {
+        return Object.prototype.hasOwnProperty.call(obj, key);
+    };
+
+    var safeGet = function safeGet(obj, key) {
+        if (Object.prototype.hasOwnProperty.call(obj, key)) return obj[key];
+    };
+
+    var forEach = function forEach(obj, fn) {
+        for (var key in obj) {
+            if (Object.prototype.hasOwnProperty.call(obj, key)) {
+                fn(key, obj[key]);
+            }
+        }
+    };
+
+    var extend = function extend(objTo, objFrom) {
+        forEach(objFrom, function (key, value) {
+            objTo[key] = value;
+        });
+        return objTo;
+    };
+
+    var clone = function clone(obj) {
+        return extend({}, obj);
+    };
+
+    var isNonNullObject = function isNonNullObject(obj) {
+        return typeof obj === 'object' && obj !== null;
+    };
+
+    var isEmpty = function isEmpty(obj) {
+        for (var key in obj) {
+            return false;
+        }
+
+        return true;
+    };
+
+    var getCount = function getCount(obj) {
+        var rv = 0;
+
+        for (var key in obj) {
+            rv++;
+        }
+
+        return rv;
+    };
+
+    var map = function map(obj, f, opt_obj) {
+        var res = {};
+
+        for (var key in obj) {
+            res[key] = f.call(opt_obj, obj[key], key, obj);
+        }
+
+        return res;
+    };
+
+    var findKey = function findKey(obj, fn, opt_this) {
+        for (var key in obj) {
+            if (fn.call(opt_this, obj[key], key, obj)) {
+                return key;
+            }
+        }
+
+        return undefined;
+    };
+
+    var findValue = function findValue(obj, fn, opt_this) {
+        var key = findKey(obj, fn, opt_this);
+        return key && obj[key];
+    };
+
+    var getAnyKey = function getAnyKey(obj) {
+        for (var key in obj) {
+            return key;
+        }
+    };
+
+    var getValues = function getValues(obj) {
+        var res = [];
+        var i = 0;
+
+        for (var key in obj) {
+            res[i++] = obj[key];
+        }
+
+        return res;
+    };
+
+    var every = function every(obj, fn) {
+        for (var key in obj) {
+            if (Object.prototype.hasOwnProperty.call(obj, key)) {
+                if (!fn(key, obj[key])) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    };
+
+    var querystring = function querystring(querystringParams) {
+        var params = [];
+        forEach(querystringParams, function (key, value) {
+            if (Array.isArray(value)) {
+                value.forEach(function (arrayVal) {
+                    params.push(encodeURIComponent(key) + '=' + encodeURIComponent(arrayVal));
+                });
+            } else {
+                params.push(encodeURIComponent(key) + '=' + encodeURIComponent(value));
+            }
+        });
+        return params.length ? '&' + params.join('&') : '';
+    };
+
+    var querystringDecode = function querystringDecode(querystring) {
+        var obj = {};
+        var tokens = querystring.replace(/^\?/, '').split('&');
+        tokens.forEach(function (token) {
+            if (token) {
+                var key = token.split('=');
+                obj[key[0]] = key[1];
+            }
+        });
+        return obj;
+    };
+
+    var Hash = function () {
+        function Hash() {
+            this.blockSize = -1;
+        }
+
+        return Hash;
+    }();
+
+    var Sha1 = function (_super) {
+        tslib_1.__extends(Sha1, _super);
+
+        function Sha1() {
+            var _this = _super.call(this) || this;
+
+            _this.chain_ = [];
+            _this.buf_ = [];
+            _this.W_ = [];
+            _this.pad_ = [];
+            _this.inbuf_ = 0;
+            _this.total_ = 0;
+            _this.blockSize = 512 / 8;
+            _this.pad_[0] = 128;
+
+            for (var i = 1; i < _this.blockSize; ++i) {
+                _this.pad_[i] = 0;
+            }
+
+            _this.reset();
+
+            return _this;
+        }
+
+        Sha1.prototype.reset = function () {
+            this.chain_[0] = 0x67452301;
+            this.chain_[1] = 0xefcdab89;
+            this.chain_[2] = 0x98badcfe;
+            this.chain_[3] = 0x10325476;
+            this.chain_[4] = 0xc3d2e1f0;
+            this.inbuf_ = 0;
+            this.total_ = 0;
+        };
+
+        Sha1.prototype.compress_ = function (buf, opt_offset) {
+            if (!opt_offset) {
+                opt_offset = 0;
+            }
+
+            var W = this.W_;
+
+            if (typeof buf === 'string') {
+                for (var i = 0; i < 16; i++) {
+                    W[i] = buf.charCodeAt(opt_offset) << 24 | buf.charCodeAt(opt_offset + 1) << 16 | buf.charCodeAt(opt_offset + 2) << 8 | buf.charCodeAt(opt_offset + 3);
+                    opt_offset += 4;
+                }
+            } else {
+                for (var i = 0; i < 16; i++) {
+                    W[i] = buf[opt_offset] << 24 | buf[opt_offset + 1] << 16 | buf[opt_offset + 2] << 8 | buf[opt_offset + 3];
+                    opt_offset += 4;
+                }
+            }
+
+            for (var i = 16; i < 80; i++) {
+                var t = W[i - 3] ^ W[i - 8] ^ W[i - 14] ^ W[i - 16];
+                W[i] = (t << 1 | t >>> 31) & 0xffffffff;
+            }
+
+            var a = this.chain_[0];
+            var b = this.chain_[1];
+            var c = this.chain_[2];
+            var d = this.chain_[3];
+            var e = this.chain_[4];
+            var f, k;
+
+            for (var i = 0; i < 80; i++) {
+                if (i < 40) {
+                    if (i < 20) {
+                        f = d ^ b & (c ^ d);
+                        k = 0x5a827999;
+                    } else {
+                        f = b ^ c ^ d;
+                        k = 0x6ed9eba1;
+                    }
+                } else {
+                    if (i < 60) {
+                        f = b & c | d & (b | c);
+                        k = 0x8f1bbcdc;
+                    } else {
+                        f = b ^ c ^ d;
+                        k = 0xca62c1d6;
+                    }
+                }
+
+                var t = (a << 5 | a >>> 27) + f + e + k + W[i] & 0xffffffff;
+                e = d;
+                d = c;
+                c = (b << 30 | b >>> 2) & 0xffffffff;
+                b = a;
+                a = t;
+            }
+
+            this.chain_[0] = this.chain_[0] + a & 0xffffffff;
+            this.chain_[1] = this.chain_[1] + b & 0xffffffff;
+            this.chain_[2] = this.chain_[2] + c & 0xffffffff;
+            this.chain_[3] = this.chain_[3] + d & 0xffffffff;
+            this.chain_[4] = this.chain_[4] + e & 0xffffffff;
+        };
+
+        Sha1.prototype.update = function (bytes, opt_length) {
+            if (bytes == null) {
+                return;
+            }
+
+            if (opt_length === undefined) {
+                opt_length = bytes.length;
+            }
+
+            var lengthMinusBlock = opt_length - this.blockSize;
+            var n = 0;
+            var buf = this.buf_;
+            var inbuf = this.inbuf_;
+
+            while (n < opt_length) {
+                if (inbuf == 0) {
+                    while (n <= lengthMinusBlock) {
+                        this.compress_(bytes, n);
+                        n += this.blockSize;
+                    }
+                }
+
+                if (typeof bytes === 'string') {
+                    while (n < opt_length) {
+                        buf[inbuf] = bytes.charCodeAt(n);
+                        ++inbuf;
+                        ++n;
+
+                        if (inbuf == this.blockSize) {
+                            this.compress_(buf);
+                            inbuf = 0;
+                            break;
+                        }
+                    }
+                } else {
+                    while (n < opt_length) {
+                        buf[inbuf] = bytes[n];
+                        ++inbuf;
+                        ++n;
+
+                        if (inbuf == this.blockSize) {
+                            this.compress_(buf);
+                            inbuf = 0;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            this.inbuf_ = inbuf;
+            this.total_ += opt_length;
+        };
+
+        Sha1.prototype.digest = function () {
+            var digest = [];
+            var totalBits = this.total_ * 8;
+
+            if (this.inbuf_ < 56) {
+                this.update(this.pad_, 56 - this.inbuf_);
+            } else {
+                this.update(this.pad_, this.blockSize - (this.inbuf_ - 56));
+            }
+
+            for (var i = this.blockSize - 1; i >= 56; i--) {
+                this.buf_[i] = totalBits & 255;
+                totalBits /= 256;
+            }
+
+            this.compress_(this.buf_);
+            var n = 0;
+
+            for (var i = 0; i < 5; i++) {
+                for (var j = 24; j >= 0; j -= 8) {
+                    digest[n] = this.chain_[i] >> j & 255;
+                    ++n;
+                }
+            }
+
+            return digest;
+        };
+
+        return Sha1;
+    }(Hash);
+
+    function createSubscribe(executor, onNoObservers) {
+        var proxy = new ObserverProxy(executor, onNoObservers);
+        return proxy.subscribe.bind(proxy);
+    }
+
+    var ObserverProxy = function () {
+        function ObserverProxy(executor, onNoObservers) {
+            var _this = this;
+
+            this.observers = [];
+            this.unsubscribes = [];
+            this.observerCount = 0;
+            this.task = Promise.resolve();
+            this.finalized = false;
+            this.onNoObservers = onNoObservers;
+            this.task.then(function () {
+                executor(_this);
+            }).catch(function (e) {
+                _this.error(e);
+            });
+        }
+
+        ObserverProxy.prototype.next = function (value) {
+            this.forEachObserver(function (observer) {
+                observer.next(value);
+            });
+        };
+
+        ObserverProxy.prototype.error = function (error) {
+            this.forEachObserver(function (observer) {
+                observer.error(error);
+            });
+            this.close(error);
+        };
+
+        ObserverProxy.prototype.complete = function () {
+            this.forEachObserver(function (observer) {
+                observer.complete();
+            });
+            this.close();
+        };
+
+        ObserverProxy.prototype.subscribe = function (nextOrObserver, error, complete) {
+            var _this = this;
+
+            var observer;
+
+            if (nextOrObserver === undefined && error === undefined && complete === undefined) {
+                throw new Error('Missing Observer.');
+            }
+
+            if (implementsAnyMethods(nextOrObserver, ['next', 'error', 'complete'])) {
+                observer = nextOrObserver;
+            } else {
+                observer = {
+                    next: nextOrObserver,
+                    error: error,
+                    complete: complete
+                };
+            }
+
+            if (observer.next === undefined) {
+                observer.next = noop;
+            }
+
+            if (observer.error === undefined) {
+                observer.error = noop;
+            }
+
+            if (observer.complete === undefined) {
+                observer.complete = noop;
+            }
+
+            var unsub = this.unsubscribeOne.bind(this, this.observers.length);
+
+            if (this.finalized) {
+                this.task.then(function () {
+                    try {
+                        if (_this.finalError) {
+                            observer.error(_this.finalError);
+                        } else {
+                            observer.complete();
+                        }
+                    } catch (e) {}
+
+                    return;
+                });
+            }
+
+            this.observers.push(observer);
+            return unsub;
+        };
+
+        ObserverProxy.prototype.unsubscribeOne = function (i) {
+            if (this.observers === undefined || this.observers[i] === undefined) {
+                return;
+            }
+
+            delete this.observers[i];
+            this.observerCount -= 1;
+
+            if (this.observerCount === 0 && this.onNoObservers !== undefined) {
+                this.onNoObservers(this);
+            }
+        };
+
+        ObserverProxy.prototype.forEachObserver = function (fn) {
+            if (this.finalized) {
+                return;
+            }
+
+            for (var i = 0; i < this.observers.length; i++) {
+                this.sendOne(i, fn);
+            }
+        };
+
+        ObserverProxy.prototype.sendOne = function (i, fn) {
+            var _this = this;
+
+            this.task.then(function () {
+                if (_this.observers !== undefined && _this.observers[i] !== undefined) {
+                    try {
+                        fn(_this.observers[i]);
+                    } catch (e) {
+                        if (typeof console !== 'undefined' && console.error) {
+                            console.error(e);
+                        }
+                    }
+                }
+            });
+        };
+
+        ObserverProxy.prototype.close = function (err) {
+            var _this = this;
+
+            if (this.finalized) {
+                return;
+            }
+
+            this.finalized = true;
+
+            if (err !== undefined) {
+                this.finalError = err;
+            }
+
+            this.task.then(function () {
+                _this.observers = undefined;
+                _this.onNoObservers = undefined;
+            });
+        };
+
+        return ObserverProxy;
+    }();
+
+    function async(fn, onError) {
+        return function () {
+            var args = [];
+
+            for (var _i = 0; _i < arguments.length; _i++) {
+                args[_i] = arguments[_i];
+            }
+
+            Promise.resolve(true).then(function () {
+                fn.apply(void 0, args);
+            }).catch(function (error) {
+                if (onError) {
+                    onError(error);
+                }
+            });
+        };
+    }
+
+    function implementsAnyMethods(obj, methods) {
+        if (typeof obj !== 'object' || obj === null) {
+            return false;
+        }
+
+        for (var _i = 0, methods_1 = methods; _i < methods_1.length; _i++) {
+            var method = methods_1[_i];
+
+            if (method in obj && typeof obj[method] === 'function') {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    function noop() {}
+
+    var validateArgCount = function validateArgCount(fnName, minCount, maxCount, argCount) {
+        var argError;
+
+        if (argCount < minCount) {
+            argError = 'at least ' + minCount;
+        } else if (argCount > maxCount) {
+            argError = maxCount === 0 ? 'none' : 'no more than ' + maxCount;
+        }
+
+        if (argError) {
+            var error = fnName + ' failed: Was called with ' + argCount + (argCount === 1 ? ' argument.' : ' arguments.') + ' Expects ' + argError + '.';
+            throw new Error(error);
+        }
+    };
+
+    function errorPrefix(fnName, argumentNumber, optional) {
+        var argName = '';
+
+        switch (argumentNumber) {
+            case 1:
+                argName = optional ? 'first' : 'First';
+                break;
+
+            case 2:
+                argName = optional ? 'second' : 'Second';
+                break;
+
+            case 3:
+                argName = optional ? 'third' : 'Third';
+                break;
+
+            case 4:
+                argName = optional ? 'fourth' : 'Fourth';
+                break;
+
+            default:
+                throw new Error('errorPrefix called with argumentNumber > 4.  Need to update it?');
+        }
+
+        var error = fnName + ' failed: ';
+        error += argName + ' argument ';
+        return error;
+    }
+
+    function validateNamespace(fnName, argumentNumber, namespace, optional) {
+        if (optional && !namespace) return;
+
+        if (typeof namespace !== 'string') {
+            throw new Error(errorPrefix(fnName, argumentNumber, optional) + 'must be a valid firebase namespace.');
+        }
+    }
+
+    function validateCallback(fnName, argumentNumber, callback, optional) {
+        if (optional && !callback) return;
+        if (typeof callback !== 'function') throw new Error(errorPrefix(fnName, argumentNumber, optional) + 'must be a valid function.');
+    }
+
+    function validateContextObject(fnName, argumentNumber, context, optional) {
+        if (optional && !context) return;
+        if (typeof context !== 'object' || context === null) throw new Error(errorPrefix(fnName, argumentNumber, optional) + 'must be a valid context object.');
+    }
+
+    var stringToByteArray$1 = function stringToByteArray$1(str) {
+        var out = [],
+            p = 0;
+
+        for (var i = 0; i < str.length; i++) {
+            var c = str.charCodeAt(i);
+
+            if (c >= 0xd800 && c <= 0xdbff) {
+                var high = c - 0xd800;
+                i++;
+                assert(i < str.length, 'Surrogate pair missing trail surrogate.');
+                var low = str.charCodeAt(i) - 0xdc00;
+                c = 0x10000 + (high << 10) + low;
+            }
+
+            if (c < 128) {
+                out[p++] = c;
+            } else if (c < 2048) {
+                out[p++] = c >> 6 | 192;
+                out[p++] = c & 63 | 128;
+            } else if (c < 65536) {
+                out[p++] = c >> 12 | 224;
+                out[p++] = c >> 6 & 63 | 128;
+                out[p++] = c & 63 | 128;
+            } else {
+                out[p++] = c >> 18 | 240;
+                out[p++] = c >> 12 & 63 | 128;
+                out[p++] = c >> 6 & 63 | 128;
+                out[p++] = c & 63 | 128;
+            }
+        }
+
+        return out;
+    };
+
+    var stringLength = function stringLength(str) {
+        var p = 0;
+
+        for (var i = 0; i < str.length; i++) {
+            var c = str.charCodeAt(i);
+
+            if (c < 128) {
+                p++;
+            } else if (c < 2048) {
+                p += 2;
+            } else if (c >= 0xd800 && c <= 0xdbff) {
+                p += 4;
+                i++;
+            } else {
+                p += 3;
+            }
+        }
+
+        return p;
+    };
+
+    exports.assert = assert;
+    exports.assertionError = assertionError;
+    exports.base64 = base64;
+    exports.base64Decode = base64Decode;
+    exports.base64Encode = base64Encode;
+    exports.CONSTANTS = CONSTANTS;
+    exports.deepCopy = deepCopy;
+    exports.deepExtend = deepExtend;
+    exports.patchProperty = patchProperty;
+    exports.Deferred = Deferred;
+    exports.getUA = getUA;
+    exports.isMobileCordova = isMobileCordova;
+    exports.isNodeSdk = isNodeSdk;
+    exports.isReactNative = isReactNative;
+    exports.ErrorFactory = ErrorFactory;
+    exports.FirebaseError = FirebaseError;
+    exports.patchCapture = patchCapture;
+    exports.jsonEval = jsonEval;
+    exports.stringify = stringify;
+    exports.decode = decode;
+    exports.isAdmin = isAdmin;
+    exports.issuedAtTime = issuedAtTime;
+    exports.isValidFormat = isValidFormat;
+    exports.isValidTimestamp = isValidTimestamp;
+    exports.clone = clone;
+    exports.contains = contains;
+    exports.every = every;
+    exports.extend = extend;
+    exports.findKey = findKey;
+    exports.findValue = findValue;
+    exports.forEach = forEach;
+    exports.getAnyKey = getAnyKey;
+    exports.getCount = getCount;
+    exports.getValues = getValues;
+    exports.isEmpty = isEmpty;
+    exports.isNonNullObject = isNonNullObject;
+    exports.map = map;
+    exports.safeGet = safeGet;
+    exports.querystring = querystring;
+    exports.querystringDecode = querystringDecode;
+    exports.Sha1 = Sha1;
+    exports.async = async;
+    exports.createSubscribe = createSubscribe;
+    exports.errorPrefix = errorPrefix;
+    exports.validateArgCount = validateArgCount;
+    exports.validateCallback = validateCallback;
+    exports.validateContextObject = validateContextObject;
+    exports.validateNamespace = validateNamespace;
+    exports.stringLength = stringLength;
+    exports.stringToByteArray = stringToByteArray$1;
+});

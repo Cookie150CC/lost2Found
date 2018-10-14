@@ -8,7 +8,9 @@ import {
     TouchableOpacity,
     View,
     Button,
-    Alert
+    Alert,
+    AppRegistry,
+    TextInput,
 } from 'react-native';
 import { WebBrowser,
     MapView,
@@ -18,18 +20,30 @@ import { WebBrowser,
     Camera,
     ImagePicker
 } from 'expo';
+import PopupDialog, {
+  DialogTitle,
+  DialogButton,
+  SlideAnimation,
+  ScaleAnimation,
+  FadeAnimation,
+} from 'react-native-popup-dialog';
 
 import { MonoText } from '../components/StyledText';
+
+const scaleAnimation = new ScaleAnimation();
 
 export default class HomeScreen extends React.Component {
     static navigationOptions = {
         header: null,
     };
     state = {
+        name: "",
+        desc: "",
         location: null,
         errorMessage: null,
         hasCameraPermission: null,
         type: Camera.Constants.Type.back,
+        dialogShow: false,
     };
     // constructor(props) {
     // super(props)
@@ -51,6 +65,10 @@ export default class HomeScreen extends React.Component {
             this._getCameraAsync();
         }
     }
+
+    showScaleAnimationDialog = () => {
+    this.scaleAnimationDialog.show();
+  }
 
     _getLocationAsync = async () => {
         let { status } = await Permissions.askAsync(Permissions.LOCATION);
@@ -117,7 +135,7 @@ export default class HomeScreen extends React.Component {
             </View>
             <View style={{backgroundColor: "red",flex: 1}} >
             <Button
-            onPress={this._onPressButton}
+            onPress={this.showScaleAnimationDialog}
             title="Lost"
             color="#e8e8e8"
             />
@@ -126,6 +144,44 @@ export default class HomeScreen extends React.Component {
             <View style={styles.buttonContainer}>
 
             </View>
+
+            <PopupDialog
+              ref={(popupDialog) => {
+                this.scaleAnimationDialog = popupDialog;
+              }}
+              dialogAnimation={scaleAnimation}
+              dialogTitle={<DialogTitle title="Loss Report" />}
+              actions={[
+                <DialogButton
+                  text="Dismiss"
+                  onPress={() => {
+                    this.scaleAnimationDialog.dismiss();
+                  }}
+                  key="button-1"
+                />,<DialogButton
+                  text="Submit"
+                  onPress={() => {
+                    this.addToDB(this.state.name, this.state.desc);
+                  }}
+                  key="button-2"
+                />,
+              ]}
+            >  <View>
+              <TextInput
+                style={{height: 40, borderColor: 'gray', borderWidth: 1, textAlign: "center"}}
+                onChangeText={(name) => this.setState({name})}
+                value={this.state.name}
+                placeholder="Item Name"
+              />
+              </View>
+              <View>
+            <TextInput
+              style={{height: 40, borderColor: 'gray', borderWidth: 1, textAlign: "center"}}
+              onChangeText={(desc) => this.setState({desc})}
+              value={this.state.desc}
+              placeholder="Item Description(ex. Color)"
+              />
+              </View></PopupDialog>
             </View>
         );
     }
@@ -162,6 +218,11 @@ export default class HomeScreen extends React.Component {
             'https://docs.expo.io/versions/latest/guides/up-and-running.html#can-t-see-your-changes'
         );
     };
+
+    addToDB(n, d){
+      alert("added to db");
+      this.scaleAnimationDialog.dismiss();
+    }
 
     _onPressButton = () => {
         Alert.alert('You tapped the button!');
