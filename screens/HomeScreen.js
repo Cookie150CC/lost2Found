@@ -168,7 +168,8 @@ export default class HomeScreen extends React.Component {
     };
 
     _onPressFoundButton = () => {
-      this.takePicture();
+      var pic = this.takePicture();
+      var loc = this.location;
     };
 }
 
