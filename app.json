@@ -1,6 +1,10 @@
 {
   "expo": {
     "name": "lost2Found",
+    "platforms": [
+      "ios",
+      "android"
+    ],
     "description": "A very interesting project.",
     "slug": "lost2Found",
     "privacy": "public",
@@ -22,13 +26,13 @@
     ],
     "ios": {
         "supportsTablet": true,
-          "bundleIdentifier": "com.idk.app",
+          "bundleIdentifier": "com.lost2found.app",
           "config": {
             "googleMapsApiKey": "AIzaSyB4x9ALjl2-oFpVBOKSeJJkOJn5w86IBIA"
           }
       },
       "android": {
-          "package": "com.idk.app",
+          "package": "com.lost2found.app",
           "config": {
               "googleMaps": { "apiKey": "AIzaSyB4x9ALjl2-oFpVBOKSeJJkOJn5w86IBIA" }
            }
